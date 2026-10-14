@@ -1,0 +1,20 @@
+{
+	// 工程源码含中文注释，统一按 UTF-8 读写
+	"files.encoding": "utf8",
+	"files.autoGuessEncoding": false,
+	"files.eol": "\r\n",
+	// 代码缩进用 tab，与 .clang-format 保持一致
+	"editor.tabSize": 4,
+	"editor.insertSpaces": false,
+	"editor.detectIndentation": false,
+	"C_Cpp.default.cStandard": "c99",
+	// 生成物不参与搜索
+	"files.exclude": {
+		"build/*.o": true,
+		"run/*.exe": true
+	},
+	"search.exclude": {
+		"build": true,
+		"run": true
+	}
+}

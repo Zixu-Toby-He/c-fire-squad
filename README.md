@@ -39,10 +39,20 @@
 include/bot_ctrl.h    状态表与 4 个状态转移函数声明
 src/bot_ctrl.c        状态转移规则（leftest / mid / rightest / single）与状态名
 src/main.c            礼枪队模拟：双缓冲同步迭代，逐拍打印整队状态
-test/test_sync.c      自检程序：逐个规模检查“是否全体在同一拍开火”
 Makefile              编译规则（build 放中间文件，run 放可执行文件）
 .vscode/              VS Code 跳转、编译任务与调试配置
 ```
+
+`Makefile` 里做了两件事：
+
+* `CURRENT_PATH` 用 `$(abspath $(lastword $(MAKEFILE_LIST)))` 算出本文件所在目录
+  （相当于 `pathlib.Path(__file__).parent`），并在开头校验“当前目录就是工程目录”，
+  在别处直接 `mingw32-make -f ...` 会立刻报错提示，而不是把产物生成到错误的地方；
+* 指定命令行为 PowerShell：`SHELL := powershell.exe` 加 `.SHELLFLAGS := -NoProfile -Command`
+  （必须带 `.exe`，否则 make 会静默退回 cmd）；配方里只写相对路径，
+  因为 make 把命令交给 shell 时按当前代码页解释，含中文的绝对路径会被弄成乱码。
+
+所以直接在工程目录里执行 `mingw32-make` 即可。
 
 ## 编译与运行
 
@@ -51,10 +61,15 @@ Makefile              编译规则（build 放中间文件，run 放可执行文
 
 ```
 mingw32-make           # 编译全部源码，生成 run/bot_team.exe，中间文件在 build/
+mingw32-make all       # 同上（显式指定默认目标）；已是最新时只打印一行提示
 mingw32-make run       # 编译并运行 run/bot_team.exe
-mingw32-make check     # 编译并运行自检程序 run/test_sync.exe
-mingw32-make clean     # 删除 build/*.o 与 run/*.exe
+mingw32-make clean     # 删除 build/ 与 run/ 两个目录（下次编译会自动重建）
 ```
+
+配方由 PowerShell 执行，因此 `clean` 用的是 `Remove-Item`、建目录用的是 `New-Item`；
+`Remove-Item` 删目录时带上 `-Recurse` 才不会弹出“该项具有子项…是否继续”的确认提示，
+外面再套一层 `Test-Path` 判断，这样目录不存在时也不会报错。
+如果你想换回 cmd，把 `SHELL`/`.SHELLFLAGS` 两行去掉，并把这两条命令改回 `del` / `mkdir` 即可。
 
 不想用 make 时，等价的手工命令是：
 
@@ -69,20 +84,21 @@ gcc build/bot_ctrl.o build/main.o -o run/bot_team.exe
 | 文件 | 作用 |
 | --- | --- |
 | `.vscode/c_cpp_properties.json` | 指定 `-Iinclude` 与 gcc 路径，`#include "bot_ctrl.h"`、`get_next_status_mid` 等符号可以 Ctrl+Click 跳转 |
-| `.vscode/tasks.json` | `Ctrl+Shift+B` 执行 `mingw32-make`（默认任务），另有 check / clean 任务，报错可直接点击跳转 |
+| `.vscode/tasks.json` | `Ctrl+Shift+B` 执行 `mingw32-make`（默认任务），另有 run / clean 任务，报错可直接点击跳转 |
 | `.vscode/launch.json` | `F5` 用 gdb 调试 `run/bot_team.exe`，会先自动执行编译任务 |
 | `.vscode/settings.json` | 文件编码固定 UTF-8、缩进用 tab（与工程代码风格一致）、隐藏 build/run 生成物 |
 | `.vscode/extensions.json` | 推荐安装 C/C++ 扩展（跳转与调试依赖它） |
 
-## 自检结果
+## 验证记录
 
-`mingw32-make check` 会逐个规模模拟并检查“全体是否在同一拍第一次开火”：
+规则完成后用临时的自检程序逐规模模拟过（检查“全体是否在同一拍第一次开火”），结果：
 
-* n = 1~64 全部通过（0 个失败），例如 n=11 于第 32 拍、n=33 于第 102 拍全体同时开火；
+* n = 1~64 全部通过，例如 n=11 于第 32 拍、n=33 于第 102 拍全体同时开火；
 * 开火时刻约为 3n 拍，属于经典的“双速波 + 折半递归”解（3n 量级），不是理论最快的 2n-2。
 
 过程中曾卡住的是 n = 9、11、13、15… 这类含奇数长度分队的规模，原因是中间将军只反射了一侧的手掌信号；
-补上 `MIRR_BM`（两侧同时反射）后全部通过。
+补上 `MIRR_BM`（两侧同时反射）后全部通过。该自检程序已按需要删除，
+需要时可以用 `src/bot_ctrl.c` 加一个 main 快速重写。
 
 ## 已知问题
 

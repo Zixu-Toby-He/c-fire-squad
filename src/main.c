@@ -57,7 +57,7 @@ static void bot_team_iter(bot_team_t* bot_team)
 		case 0:
 			break;
 		default:
-			for (size_t i = 1; i < (bot_team->n_bots - 1); i++)
+			for (uint8_t i = 1; i < (bot_team->n_bots - 1); i++)
 			{
 				bot_team->bots_buffer[bot_team->iter_count & 0x1][i] = get_next_status_mid(
 					bot_team->bots_buffer[~(bot_team->iter_count) & 0x1][i],

@@ -48,12 +48,6 @@ static int is_general_phase(bot_status_t status)
 	}
 }
 
-// 是否起镜面作用（发令中的将军与静默将军都可以当镜子）
-static int is_mirror(bot_status_t status)
-{
-	return (is_idle_general(status) || is_general_phase(status));
-}
-
 // 是否处于“发令/发令后三拍”的忙碌状态（需要逐拍推进）
 static int is_general_busy(bot_status_t status)
 {
@@ -83,26 +77,6 @@ static int is_hand_from_right(bot_status_t status)
 		status == BOT_STATUS_EMIT_B);
 }
 
-// 是否是普通行进中的手掌信号
-static int is_moving_hand(bot_status_t status)
-{
-	return (status == BOT_STATUS_HAND_R || status == BOT_STATUS_HAND_L);
-}
-
-// 将军处于第 1 拍（腿部信号前锋就在将军自己身上）
-static int is_general_phase1(bot_status_t status)
-{
-	return (status == BOT_STATUS_GEN_R1 || status == BOT_STATUS_GEN_L1 ||
-		status == BOT_STATUS_GEN_B1);
-}
-
-// 将军处于第 3 拍
-static int is_general_phase3(bot_status_t status)
-{
-	return (status == BOT_STATUS_GEN_R3 || status == BOT_STATUS_GEN_L3 ||
-		status == BOT_STATUS_GEN_B3);
-}
-
 // 将军处于第 1 拍并且是“向右带队”（镜面在右侧）
 static int is_general_phase1_right(bot_status_t status)
 {
@@ -125,30 +99,6 @@ static int is_general_phase3_right(bot_status_t status)
 static int is_general_phase3_left(bot_status_t status)
 {
 	return (status == BOT_STATUS_GEN_L3 || status == BOT_STATUS_GEN_B3);
-}
-
-// 腿部信号前锋（向右 / 向左）
-static int is_leg_right(bot_status_t status)
-{
-	return (status == BOT_STATUS_LEG_R1 || status == BOT_STATUS_LEG_R2 ||
-		status == BOT_STATUS_LEG_R3);
-}
-
-static int is_leg_left(bot_status_t status)
-{
-	return (status == BOT_STATUS_LEG_L1 || status == BOT_STATUS_LEG_L2 ||
-		status == BOT_STATUS_LEG_L3);
-}
-
-// 腿部信号前锋处于第 1 拍 / 第 3 拍
-static int is_leg_phase1(bot_status_t status)
-{
-	return (status == BOT_STATUS_LEG_R1 || status == BOT_STATUS_LEG_L1);
-}
-
-static int is_leg_phase3(bot_status_t status)
-{
-	return (status == BOT_STATUS_LEG_R3 || status == BOT_STATUS_LEG_L3);
 }
 
 // 将军第 1 拍 -> 第 2 拍；第 2 拍 -> 第 3 拍；第 3 拍 -> 静默
@@ -582,6 +532,7 @@ bot_status_t get_next_status_rightest(bot_status_t self_status, bot_status_t lef
 // 只有一台机器人时直接开火
 bot_status_t get_next_status_single(bot_status_t self_status)
 {
+	(void)self_status;
 	return BOT_STATUS_SHOOT;
 }
 
