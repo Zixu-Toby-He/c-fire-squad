@@ -1,0 +1,20 @@
+# 本项目 C 代码风格约束（配合 .codex/AGENTS.md）
+Language: Cpp
+BasedOnStyle: Microsoft
+UseTab: Always
+TabWidth: 4
+IndentWidth: 4
+BreakBeforeBraces: Allman
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterControlStatement: Always
+  BeforeElse: true
+ColumnLimit: 120
+IndentCaseLabels: true
+PointerAlignment: Right
+AllowShortBlocksOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+AlignEscapedNewlines: Left
+SortIncludes: false
+ReflowComments: false
